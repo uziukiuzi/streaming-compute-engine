@@ -11,13 +11,13 @@ Once all this information has been sent to the master node, the GenericProcessor
 When a task queue is received on a worker machine, a new thread is started which calls execute() on each TaskWrapper, which in turn puts result units on a result queue. As this is happening, the main thread takes result units from the queue and sends them back to the appropriate WorkerLinkThread on the master machine. Note that all queues used are instances of SynchronizedQueue, a thread-safe implementation of the Java LinkedBlockingQueue.
 
 On reception at the master, each worker thread dynamically puts its result units into the chain space which sequences result units on the fly. The chain space is a thread-safe data structure in which the following happens:
-    1. the main thread in the master instantiates the chain space
-    2. worker threads put their result units into the chain space, along with the position of each unit, encapsulated as Nodes
-    3. when a node is inserted, it forms link(s) with one or both of the nodes before and after it respectively
-    4. the chain space receives a request from the main thread to get a buffer of the next available result units
-    5. if the next required node in the sequence is present it, along with any nodes it is linked to, is sent out through the chain          space's port
-    6. if the next required node in the sequence is not present, the main thread blocks until it is
-    7. when the final node is passed in, it forms a link with the 'tail' which, when received by the port, signals that all data has         been sequenced and that the chain space can be closed by the main thread.
+* the main thread in the master instantiates the chain space
+* worker threads put their result units into the chain space, along with the position of each unit, encapsulated as Nodes
+* when a node is inserted, it forms link(s) with one or both of the nodes before and after it respectively
+* the chain space receives a request from the main thread to get a buffer of the next available result units
+* if the next required node in the sequence is present it, along with any nodes it is linked to, is sent out through the chain          space's port
+* if the next required node in the sequence is not present, the main thread blocks until it is
+* when the final node is passed in, it forms a link with the 'tail' which, when received by the port, signals that all data has         been sequenced and that the chain space can be closed by the main thread.
     
 The chain space is the central component of this framework as it facilitates the reordering of result units as they arrive, taking into account that they are not expected to arrive in the sequence in which they were sent out due to the unpredictable nature of processing times and the network. It preserves correctness by waiting for the next required node to arrive and efficiency by linking together other nodes which have arrived early in the meantime. This linking into chains can be useful for speed, especially if the project is extended to support storing arriving nodes in a database to improve scalability. In this case, the number of queries could be reduced substantially.
 
