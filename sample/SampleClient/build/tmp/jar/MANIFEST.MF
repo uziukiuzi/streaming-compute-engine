@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Implementation-Title: Gradle Quickstart
+Implementation-Version: 1.0
+Main-Class: com.ui.compute.sample.client.Main
+
