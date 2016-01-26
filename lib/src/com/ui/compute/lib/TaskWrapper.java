@@ -18,7 +18,7 @@ public class TaskWrapper implements Serializable{
 	private Class<?> mInputType;
 	private Class<?> mOutputType;
 	
-	public <T> TaskWrapper(SynchronizedQueue<T> unitData, UnitTask task, List<Serializable> parameters, int position, Class<?> inputType, Class<?> outputType){
+	public <T, R> TaskWrapper(SynchronizedQueue<T> unitData, UnitTask task, List<Serializable> parameters, int position, Class<?> inputType, Class<?> outputType){
 		synchronized(this){
 			mUnitData = unitData;
 			mUnitTask = task;
@@ -29,6 +29,13 @@ public class TaskWrapper implements Serializable{
 		}
 	}
 	
+	public synchronized void setTotalTasks(int tasks){
+		mUnitTask.setTotalTasks(tasks);
+	}
+	
+	public synchronized void setSupplementaries(List<SynchronizedQueue<Serializable>> chunks, int chunkIndex){
+		mUnitTask.setSupplementaries(chunks, mUnitTask.getSupplementaries());
+	}
 	
 	public synchronized void execute() throws Exception{
 		mResult = mUnitTask.execute(mUnitData, mParameters);
@@ -38,6 +45,10 @@ public class TaskWrapper implements Serializable{
 		if(!mResult.getClass().isAssignableFrom(mOutputType)){
 			throw new ClassCastException();
 		}
+	}
+	
+	public synchronized SynchronizedQueue<?> getUnitData(){
+		return mUnitData;
 	}
 	
 	public synchronized Object getResult(){

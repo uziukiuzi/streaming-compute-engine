@@ -1,6 +1,21 @@
 package com.ui.compute.client;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ui.compute.lib.Constants;
+import com.ui.compute.lib.SynchronizedQueue;
+import com.ui.compute.lib.TaskType;
 
 
 /**
@@ -25,6 +40,7 @@ public class ComputeClient{
 	private int mMasterPort;
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
+	private Socket mConnection;
 
 	
 	/**
@@ -59,7 +75,7 @@ public class ComputeClient{
 	 */
 	public void init(URL task, URL[] args, URL[] dependencies,
 			String taskName, String[] argNames, String[] dependencyNames,
-			String packageName, SynchronizedQueue<?> data, int unitSize
+			String packageName, SynchronizedQueue<?> data, int unitSize,
 			ArrayList<Serializable> params) 
 			throws
 			UnknownHostException, IOException, URISyntaxException,
@@ -67,11 +83,10 @@ public class ComputeClient{
 		
 		mData = data;
 		mStdPackageName = packageName;
-		mPackageName = mStdPackageName.replaceAll("\.", "\\");
+		mPackageName = mStdPackageName.replace(".", "\\");
 		mUnitSize = unitSize;
 		
 		
-		Socket connection = null;
 		
 	        	
 	        	mWorkNames = new String[dependencyNames.length + 1];
@@ -79,7 +94,7 @@ public class ComputeClient{
 	        	
 	        	mArgNames = argNames;
 	        	mWorkNames[0] = taskName;
-	        	for(int i = 0; i < dependencyNames.length(); i++){
+	        	for(int i = 0; i < dependencyNames.length; i++){
 	        		mWorkNames[i + 1] = dependencyNames[i];
 	        	}
 	        	mArgURLs = args;
@@ -88,10 +103,10 @@ public class ComputeClient{
 	        		mWorkURLs[i + 1] = dependencies[i];
 	        	}
 	        	
-	        	connection = new Socket(mMasterIP, mMasterPort);
+	        	mConnection = new Socket(mMasterIP, mMasterPort);
 	            
-				out = new ObjectOutputStream(connection.getOutputStream());
-				in = new ObjectInputStream(connection.getInputStream());
+				out = new ObjectOutputStream(mConnection.getOutputStream());
+				in = new ObjectInputStream(mConnection.getInputStream());
 				if(Constants.INITIATE.equals(in.readObject())){
 					out.writeObject(TaskType.GENERIC);
 				}
@@ -169,15 +184,20 @@ public class ComputeClient{
 				if(Constants.REQUEST_UNIT_SIZE.equals(in.readObject())){
 					out.writeObject(mUnitSize);
 				}
+				
+	}
 		
 	        
 	/**
 	 * Starts the processor.
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public void start(){
+	public void start() throws ClassNotFoundException, IOException{
 		
 		if(Constants.READY_TO_START.equals(in.readObject())){
 			out.writeObject(Constants.START);
+			System.out.println("ComputeClient just started proc");
 			
 		}
 		
@@ -193,17 +213,30 @@ public class ComputeClient{
 	
 	/**
 	 * Returns the next available result unit, blocking until one is available.
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public Object getResultUnit(){
-		
+	public Object getResultUnit() throws IOException, ClassNotFoundException{
 		if(mDone){
 			return null;
 		}
-		
 		out.writeObject(Constants.REQUEST_RESULT);
 		Object resultUnit = in.readObject();
 		mDone = (boolean) in.readObject();
 		return resultUnit;
+	}
+	
+	/**
+	 * Closes the connection with the master. Must be called in a finally block
+	 * after all processing is done.
+	 */
+	public void close(){
+		try {
+			mConnection.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**

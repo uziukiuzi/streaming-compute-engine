@@ -95,13 +95,9 @@ public class WorkerObject{
 	}
 	
 	class ProcessRunnable implements Runnable{
-
-		private Object mLock;
 		
 		public ProcessRunnable(Object lock){
-			synchronized(this){
-				mLock = lock;
-			}
+			
 		}
 		
 		
@@ -120,7 +116,6 @@ public class WorkerObject{
 				while(!mWorkQueue.isEmpty()){
 					TaskWrapper taskWrapper = mWorkQueue.take();
 					position = taskWrapper.getPosition();
-					System.out.println("taskWrapper position: " + position);
 					taskWrapper.execute();
 					result = taskWrapper.getResult();
 					

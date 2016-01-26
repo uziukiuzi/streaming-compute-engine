@@ -1,5 +1,20 @@
 package com.ui.compute.worker;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URL;
+
+import com.ui.compute.lib.ClassLoaderObjectInputStream;
+import com.ui.compute.lib.Constants;
+import com.ui.compute.lib.CustomLoader;
+import com.ui.compute.lib.DownloadUtils;
+import com.ui.compute.lib.IndexedResult;
+import com.ui.compute.lib.SynchronizedQueue;
+import com.ui.compute.lib.TaskType;
+import com.ui.compute.lib.TaskWrapper;
+
 public class ComputeWorker{
 	
 	public ComputeWorker(){

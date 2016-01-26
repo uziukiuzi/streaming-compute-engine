@@ -18,8 +18,6 @@ public class CustomLoader extends ClassLoader{
         Class<?> clazz = null;
         try {
                 fis = new FileInputStream(file);
-                System.out.println("Total file size to read (in bytes) : "
-                                + fis.available());
                 int content = 0;
                 int i = 0;
                 byte[] data = new byte[fis.available()];

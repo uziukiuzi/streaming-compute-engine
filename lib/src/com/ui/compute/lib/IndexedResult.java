@@ -16,9 +16,6 @@ public class IndexedResult implements Serializable{
 		if(result != null && !(result instanceof Serializable)){
 			throw new IllegalArgumentException("Object must be serializable!");
 		}
-		if(result == null){
-			System.out.println("Result is null");
-		}
 		synchronized(this){
 			mPosition = position;
 			mResult = result;

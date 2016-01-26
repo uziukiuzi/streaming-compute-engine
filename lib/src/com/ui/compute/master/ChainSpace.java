@@ -73,20 +73,16 @@ public ChainSpace(Class<?> dataType){
 	 * @param isEnd true if this data unit is the last one to be added
 	 */
 	public void putObject(int position, Object object, boolean isEnd){
-		System.out.println("Greetings from putObject");
 		if(mIsOpen){
 		
 		// Thread-safe unit of data
 		Node node = new Node(position, object, this);
 	
 		if(isEnd){
-			System.out.println("Linking to tail, position: " + position);
 			node.linkToTail(mTail);
-			System.out.println("Linked to tail, position: " + position);
 		}
 	  
 		if(position == mPort.getRequestedLink()){
-			System.out.println("position is requested link: " + mPort.getRequestedLink());
 			
 	    // Must be in this order! Otherwise the node won't be inserted into the HashMap
 	    // before the main thread is notified that it is linked. This would result in
@@ -97,7 +93,6 @@ public ChainSpace(Class<?> dataType){
 			}
 	    node.linkToPort(mPort);
 		} else{
-			// Position is not requested link.
 				if(mNodes.containsKey(position + 1)){
 				node.setAfterLink(mNodes.get(position + 1));
 				}
@@ -271,9 +266,6 @@ public ChainSpace(Class<?> dataType){
     	   
        }
        mBeforeLink = n;
-       if(n == null){
-    	   System.out.println("n is null");
-       }
        n.simpleAfterLink(this);
      }
      
@@ -352,7 +344,7 @@ public ChainSpace(Class<?> dataType){
            	try{
            		wait();
            	} catch(InterruptedException e){
-           		System.out.println(e.getMessage());
+           		e.printStackTrace();
            	}
            }
        if(mBeforeLink != null){
@@ -475,7 +467,6 @@ public ChainSpace(Class<?> dataType){
       if(!mIsOpen){
     	  throw new IllegalStateException();
       } else{
-
        if(n != null && n.getPosition() == mRequestedLink){
        mCurrentLink = n;
        mIsLinked = true;
@@ -525,11 +516,11 @@ public ChainSpace(Class<?> dataType){
        mBuffer = buffer;
        SynchronizedHashMap<Integer, Node> nodes = mChainSpace.getNodes();
       		while(!mIsLinked && mIsOpen){
-      			// Our synchronization lock is the port.
+      			// Our synchronization lock is the Port
   				wait();
 			}
       	if(!mIsOpen){
-      		throw new IllegalStateException("Chain space is closed!");
+      		throw new IllegalStateException();
       	} else{
        
 			processChain(mCurrentLink, nodes);
@@ -583,7 +574,7 @@ public ChainSpace(Class<?> dataType){
        		
        		setRequestedLink(currentPosition + 1);
     	 } catch(InterruptedException e){
-    		 System.out.println(e.getMessage());
+    		 	e.printStackTrace();
     	 }
        		
        		

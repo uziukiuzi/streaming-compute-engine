@@ -1,5 +1,26 @@
 package com.ui.compute.master;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ui.compute.lib.ClassLoaderObjectInputStream;
+import com.ui.compute.lib.Constants;
+import com.ui.compute.lib.CustomLoader;
+import com.ui.compute.lib.DownloadUtils;
+import com.ui.compute.lib.IndexedResult;
+import com.ui.compute.lib.SynchronizedQueue;
+import com.ui.compute.lib.TaskType;
+import com.ui.compute.lib.UnitTask;
+
 public class ComputeMaster{
 	
 	private String[] mWorkers;
@@ -91,7 +112,7 @@ public class ComputeMaster{
 				
 				// Initialise the processor with the above attributes.
 				Constructor<?> constructor = workLoader.loadClass(stdPackageName + "." + workClassNames[0]).getConstructor(new Class<?>[]{Class.class, Class.class});
-				processor.initProcessor(UnitTask.class.cast(constructor.newInstance(inputType, outputType)), data, params, unitSize);
+				processor.initProcessor(constructor, data, params, unitSize);
 				
 				// Notify the client that we are ready to begin processing.
 				out.writeObject(Constants.READY_TO_START);
@@ -99,45 +120,33 @@ public class ComputeMaster{
 				// Given the go-ahead, start the processor.
 				if(Constants.START.equals(in.readObject())){
 					processor.start();
+					
 				}
 				
 				
 				// Start listening for requests from the client to get result units.
 				
 				IndexedResult wrapper = new IndexedResult(0, null);
-				System.out.println("Hey1");
 				boolean done = processor.getResultUnit(wrapper);
-				System.out.println("Hey2");
 				Object result = wrapper.getResult();
-				System.out.println("Hey3");
-				//Object result = outputType.cast(resultObj);
-				//System.out.println("Cast 2");
+				
 				while(result != null){
-					System.out.println("Hey4");
 					if(Constants.REQUEST_RESULT.equals(in.readObject())){
-						System.out.println("Hey5");
 						out.writeObject(result);
-						System.out.println("Hey6");
 						//result = outputType.cast(processor.getResultUnit());
 						done = processor.getResultUnit(wrapper);
-						System.out.println("Hey7");
 						result = wrapper.getResult();
-						System.out.println("Hey8");
 						
 						if(done){
-							System.out.println("Hey9");
 							out.writeObject(true);
-							System.out.println("Hey10");
 							break;
 						} else{
-							System.out.println("Hey11");
 							out.writeObject(false);
-							System.out.println("Hey12");
 						}
 					}
 				}
 				
-				System.out.println("Master: Done!");
+				System.out.println("Master Done!");
 				
 			}
 			
@@ -179,7 +188,7 @@ public class ComputeMaster{
 	}
 	
 	
-	public static String[] getAvailableWorkers() {
+	public String[] getAvailableWorkers() {
 		// TODO Auto-generated method stub
 		return mWorkers;
 	}
@@ -195,11 +204,8 @@ public class ComputeMaster{
 		
 		for(int i = 0; i < numParams; i++){
 			name = (String) in.readObject();
-			System.out.println("check 1");
 			clazz = loader.loadClass(name);
-			System.out.println("check 2");
 			params.add(Serializable.class.cast(clazz.cast(in.readObject())));
-			System.out.println("check 3");
 		}
 		
 		return params;

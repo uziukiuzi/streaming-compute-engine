@@ -180,11 +180,9 @@ public class WorkerLinkThread extends Thread {
 					resultUnit = (IndexedResult) temp;
 					if(resultUnit.getPosition() == mTotalToProcess - 1 && mIsEndWorker){
 						// Tell the chain space that we're at the end of the entire dataset.
-						System.out.println("end position: " + resultUnit.getPosition());
 						mChainSpace.putObject(resultUnit.getPosition(), resultUnit.getResult(), true);
 					} else{
 						// Not at the end yet, put result into chain space.
-						System.out.println("position: " + resultUnit.getPosition());
 						mChainSpace.putObject(resultUnit.getPosition(), resultUnit.getResult(), false);
 					}
 					mChecklist.remove(resultUnit.getPosition());
@@ -192,7 +190,7 @@ public class WorkerLinkThread extends Thread {
 					count++;
 				}
 				
-				System.out.println(mWorker + ": Done!");
+				System.out.println("Worker " + mWorker + " Done!");
 				
 				
 			}

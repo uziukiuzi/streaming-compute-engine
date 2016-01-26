@@ -14,8 +14,16 @@ public class SynchronizedQueue<T> implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private LinkedBlockingQueue<T> mQueue;
 	
+	public SynchronizedQueue(SynchronizedQueue<T> q){
+		mQueue = new LinkedBlockingQueue<T>(q.getUnderlyingLBQ());
+	}
+	
 	public SynchronizedQueue(){
 		mQueue = new LinkedBlockingQueue<T>();
+	}
+	
+	public LinkedBlockingQueue<T> getUnderlyingLBQ(){
+		return mQueue;
 	}
 	
 	public synchronized void put(T t) throws InterruptedException{
