@@ -1,7 +1,20 @@
 # Streaming Compute Engine
 
 ## Introduction
-This is a Java framework which can be used to run arbitrary distributed tasks on a cluster, much like Hadoop MapReduce, but updating results as a real-time stream rather than as a batch process. There are many conceivable applications in a wide range of domains, for example in computational fluid dynamics, meteorology or simulated surgery. All source is provided here as well as a basic sample program which runs a Simpson's Rule integration on an arbitrary number of nodes.
+One of Google's most significant achievements in its first decade was revolutionising the field of large-scale distributed systems with MapReduce, a robust framework for performing analytics on massive amounts of data in parallel without the need for high performance computers or supercomputers. This capability was seminal in developing Google Search and has since found countless uses in the software industry. However, a fundamental limitation of MapReduce is that it only supports batch processing and cannot be used to perform analytics on streams of data in real-time. Such a facility can be very useful in a wide range of fields such as computational fluid dynamics, real-time event processing and simulated or automated surgery, to name a few.
+
+This project is one attempt at tackling that problem. Streaming Compute Engine is a Java framework for performing arbitrary distributed tasks on datasets over a cluster and updating results as a real-time stream rather than as a batch process. It is meant as a proof-of-concept style piece of software to demonstrate reliable, on-the-fly sequencing of processed data under unreliable network and processor conditions.
+
+Some quick tests on a sample program which performs a Simpson integration on a sinusoidal function discretised into an 8000 point domain yielded the following results:
+
+Total time for processing and network data transfer
+    * with one remote worker: ~75s
+    * with two remote workers: ~42s
+    * with three remote workers: ~31s
+    
+NB the bulk of this time was expended during data transfer over the network. With a local cluster these times would be improved by orders of magnitude.
+
+A short video demonstration of the same integration on 2000 data points can be found at <link>. All source is provided here for the framework as well as the sample program. The following contains a quick guide to implementing a program using the API, a detailed explanation of how the code works and an evaluation of its strengths and weaknesses as well as a discussion of future work.
 
 ## How to Use the Framework
 To create a custom task, subclass UnitTask and implement the setSupplementaries(...) and execute(...) methods. The former allows you to provide each task with extra data points from outside the chunk on which it is operating and the latter defines the operation to be performed by a worker on the task's data chunk. Compile all class files for the custom task and dependencies which are not contained in the Java standard library. These must all be from the same package. ComputeClient assumes a gradle build so that the class files will be in said package under the bin directory.
