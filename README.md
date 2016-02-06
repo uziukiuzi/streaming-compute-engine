@@ -14,7 +14,7 @@ Total time for processing and network data transfer
     
 NB: the bulk of this time was expended during data transfer over the network. With a local cluster these times would be improved by orders of magnitude.
 
-A short video demonstration of the same integration on 2000 data points can be found at (link). All source is provided here for the framework as well as the sample program. The following contains a quick guide to implementing a program using the API, a detailed explanation of how the code works and an evaluation of its strengths and weaknesses as well as a discussion of future work.
+A short video demonstration of the same integration on 2000 data points can be found at http://www.slideshare.net/UsmanIslam4/streaming-compute-engine-demonstration-57962838. All source is provided here for the framework as well as the sample program. The following contains a quick guide to implementing a program using the API, a detailed explanation of how the code works and an evaluation of its strengths and weaknesses as well as a discussion of future work.
 
 ## How to Use the Framework
 To create a custom task, subclass UnitTask and implement the setSupplementaries(...) and execute(...) methods. The former allows you to provide each task with extra data points from outside the chunk on which it is operating and the latter defines the operation to be performed by a worker on the task's data chunk. Compile all class files for the custom task and dependencies which are not contained in the Java standard library. These must all be from the same package. ComputeClient assumes a gradle build so that the class files will be in said package under the bin directory, which resides in the project root folder.
